@@ -1,37 +1,111 @@
-package TraceRacing;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class TraceRacing {
+public class RayTracing {
     public static void main(String[] args) throws IOException {
         FileOutputStream out = new FileOutputStream("output.bmp");
         Scanner in = new Scanner(System.in);
         Scene scene = new Scene();
-        scene.addLight(new AmbientLight(0.2));
 //        scene.addObject(new Cone(new Vector(-1, 1, 1), new Point(-1, 0, 5), 0.3, 2, new Color(0, 255, 255), 100, 0.5));
-        int nsq = in.nextInt();
-        for (int i = 0; i < nsq; i++) {
-            addCube(scene, in.nextDouble(), new Point(in.nextDouble(), in.nextDouble(), in.nextDouble()), new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble()), new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble()), new Color(in.nextInt(), in.nextInt(), in.nextInt()), in.nextDouble(), in.nextDouble());
+        int width = in.nextInt();
+        int height = in.nextInt();
+        int n_light = in.nextInt();
+        for (int i = 0; i < n_light; i++) {
+            String type_light = in.next();
+            switch (type_light) {
+                case "light_dir" -> {
+                    Vector vec = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    double imp = in.nextDouble();
+                    scene.addLight(new DirectLight(vec, imp));
+                    break;
+                }
+                case "light_amb" -> {
+//                    System.out.println(type_light);
+                    double imp = in.nextDouble();
+//                    System.out.println(imp);
+                    scene.addLight(new AmbientLight(imp));
+                    break;
+                }
+                case "light_point" -> {
+                    Point point = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    double imp = in.nextDouble();
+                    scene.addLight(new PointLight(point, imp));
+                    break;
+                }
+            }
         }
-        int np = in.nextInt();
-        for (int i = 0; i < np; i++) {
-            scene.addObject(new Plane(new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble()), new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble()), new Point(in.nextDouble(), in.nextDouble(), in.nextDouble()), new Color(in.nextInt(), in.nextInt(), in.nextInt()), in.nextDouble(), in.nextDouble()));
+
+        int n_obj = in.nextInt();
+        for (int i = 0; i < n_obj; i++) {
+            String type_obj = in.next();
+            switch (type_obj) {
+                case "sphere" -> {
+                    Point center = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    double r = in.nextDouble();
+                    Color color = new Color(in.nextInt(), in.nextInt(), in.nextInt());
+                    double specular = in.nextDouble();
+                    double reflective = in.nextDouble();
+                    scene.addObject(new Sphere(center, r, color, specular, reflective));
+                    break;
+                }
+                case "plane" -> {
+                    Vector normal = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Point center = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Color color = new Color(in.nextInt(), in.nextInt(), in.nextInt());
+                    double specular = in.nextDouble();
+                    double reflective = in.nextDouble();
+                    scene.addObject(new Plane(normal, center, color, specular, reflective));
+                    break;
+                }
+                case "square" -> {
+                    double length = in.nextDouble();
+                    Point center = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Vector vec_A = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Vector vec_B = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Color color = new Color(in.nextInt(), in.nextInt(), in.nextInt());
+                    double specular = in.nextDouble();
+                    double reflective = in.nextDouble();
+                    scene.addObject(new Square(length, center, vec_A, vec_B, color, specular, reflective));
+                    break;
+                }
+                case "circle" -> {
+                    Vector normal = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Point center = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    double r = in.nextDouble();
+                    Color color = new Color(in.nextInt(), in.nextInt(), in.nextInt());
+                    double specular = in.nextDouble();
+                    double reflective = in.nextDouble();
+                    scene.addObject(new Circle(normal, center, r, color, specular, reflective));
+                    break;
+                }
+                case "cone" -> {
+                    Vector cone_height = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Point center = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    double angle = in.nextDouble();
+                    double length = in.nextDouble();
+                    Color color = new Color(in.nextInt(), in.nextInt(), in.nextInt());
+                    double specular = in.nextDouble();
+                    double reflective = in.nextDouble();
+                    scene.addObject(new Cone(cone_height, center, angle, length, color, specular, reflective));
+                    break;
+                }
+                case "cube" -> {
+                    double length = in.nextDouble();
+                    Point center = new Point(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Vector vec_A = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Vector vec_B = new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble());
+                    Color color = new Color(in.nextInt(), in.nextInt(), in.nextInt());
+                    double specular = in.nextDouble();
+                    double reflective = in.nextDouble();
+                    addCube(scene, length, center, vec_A, vec_B, color, specular, reflective);
+                    break;
+                }
+            }
         }
-        int nf = in.nextInt();
-        for (int i = 0; i < nf; i++) {
-            scene.addObject(new Sphere(in.nextDouble(), in.nextDouble(), in.nextDouble(), in.nextDouble(), new Color(in.nextInt(), in.nextInt(), in.nextInt()), in.nextDouble(), in.nextDouble()));
-        }
-        int nL = in.nextInt();
-        for (int i = 0; i < nL; i++) {
-            String typeLight = in.next();
-            if (typeLight.equals("d"))
-                scene.addLight(new DirectLight(new Vector(in.nextDouble(), in.nextDouble(), in.nextDouble()), in.nextDouble()));
-            else scene.addLight(new PointLight(new Point(in.nextDouble(), in.nextDouble(), in.nextDouble()), in.nextDouble()));
-        }
+
         long start = System.currentTimeMillis();
-        Canvas canvas = new Canvas(1000, 1000);
+        Canvas canvas = new Canvas(width, height);
         canvas.render(scene);
         long end = System.currentTimeMillis();
         float sec = (end - start) / 1000F;
@@ -45,17 +119,17 @@ public class TraceRacing {
         System.out.println(sec + " seconds for bmp");
         out.close();
     }
-    public static void addCube(Scene scene, double S, Point center, Vector v1, Vector v2, Color color, double s, double rf) {
+    public static void addCube(Scene scene, double length, Point center, Vector v1, Vector v2, Color color, double specular, double reflective) {
         Vector v3 = v1.mulVector(v2);
         v1.div();
         v2.div();
         v3.div();
-        scene.addObject(new Square(S, new Point(center.x + v3.x * S / 2, center.y + v3.y * S / 2, center.z + v3.z * S / 2), v1, v2, color, s, rf));
-        scene.addObject(new Square(S, new Point(center.x - v3.x * S / 2, center.y - v3.y * S / 2, center.z - v3.z * S / 2), v1, v2, color, s, rf));
-        scene.addObject(new Square(S, new Point(center.x + v2.x * S / 2, center.y + v2.y * S / 2, center.z + v2.z * S / 2), v1, v3, color, s, rf));
-        scene.addObject(new Square(S, new Point(center.x - v2.x * S / 2, center.y - v2.y * S / 2, center.z - v2.z * S / 2), v1, v3, color, s, rf));
-        scene.addObject(new Square(S, new Point(center.x + v1.x * S / 2, center.y + v1.y * S / 2, center.z + v1.z * S / 2), v3, v2, color, s, rf));
-        scene.addObject(new Square(S, new Point(center.x - v1.x * S / 2, center.y - v1.y * S / 2, center.z - v1.z * S / 2), v3, v2, color, s, rf));
+        scene.addObject(new Square(length, new Point(center.x + v3.x * length / 2, center.y + v3.y * length / 2, center.z + v3.z * length / 2), v1, v2, color, specular, reflective));
+        scene.addObject(new Square(length, new Point(center.x - v3.x * length / 2, center.y - v3.y * length / 2, center.z - v3.z * length / 2), v1, v2, color, specular, reflective));
+        scene.addObject(new Square(length, new Point(center.x + v2.x * length / 2, center.y + v2.y * length / 2, center.z + v2.z * length / 2), v1, v3, color, specular, reflective));
+        scene.addObject(new Square(length, new Point(center.x - v2.x * length / 2, center.y - v2.y * length / 2, center.z - v2.z * length / 2), v1, v3, color, specular, reflective));
+        scene.addObject(new Square(length, new Point(center.x + v1.x * length / 2, center.y + v1.y * length / 2, center.z + v1.z * length / 2), v3, v2, color, specular, reflective));
+        scene.addObject(new Square(length, new Point(center.x - v1.x * length / 2, center.y - v1.y * length / 2, center.z - v1.z * length / 2), v3, v2, color, specular, reflective));
     }
 }
 abstract class Object {
@@ -71,7 +145,7 @@ abstract class Light {
     abstract double intensity(Object obj, Point point, Scene scene, Vector vector);
 }
 class DirectLight extends Light {
-    double imp, s;
+    double imp, specular;
     Vector vector;
     DirectLight (Vector vector, double imp) {
         this.imp = imp;
@@ -104,7 +178,7 @@ class AmbientLight extends Light {
     AmbientLight (double imp) {
         this.imp = imp;
     }
-    double intensity(Object obj, Point point, Scene scene, Vector vector) {
+    double intensity(Object obj, Point point,  Scene scene, Vector vector) {
         return imp;
     }
 
@@ -116,7 +190,7 @@ class PointLight extends Light {
         this.imp = imp;
         this.center = center;
     }
-    double intensity(Object obj, Point point, Scene scene, Vector v) {
+    double intensity(Object obj, Point point,  Scene scene, Vector v) {
         Vector kek = new Vector(point, center);
         kek.div();
         double dist;
@@ -248,18 +322,18 @@ class Ray {
     }
 }
 class Sphere extends Object {
-    double r, s, xc, yc, zc, rf;
+    double r, specular, xc, yc, zc, reflective;
     Point center;
     Color Color;
-    Sphere (double x, double y, double zc, double r, Color Color, double s, double rf){
+    Sphere (Point center, double r, Color Color, double specular, double reflective){
         this.r = r;
-        this.rf = rf;
-        this.s = s;
-        xc = x;
-        yc = y;
-        this.zc = zc;
-        center = new Point(x, y, zc);
+        this.reflective = reflective;
+        this.specular = specular;
+        this.center = center;
         this.Color = Color;
+        xc = center.x;
+        yc = center.y;
+        this.zc = center.z;
     }
     public double dist(Vector vector, Point point) {
         double x1 = xc - point.x, y1 = yc - point.y, z1 = zc - point.z;
@@ -284,35 +358,35 @@ class Sphere extends Object {
         return new Vector(center, point);
     }
     public double getS() {
-        return s;
+        return specular;
     }
     public double getRF() {
-        return rf;
+        return reflective;
     }
     public String toString() {
         return Color + " ";
     }
 }
 class Plane extends Object {
-    double s, rf;
+    double specular, reflective;
     Vector A, B, N;
     Point center;
     Color color;
-    Plane(Vector A, Vector B, Point center, Color color, double s, double rf) {
+    Plane(Vector A, Vector B, Point center, Color color, double specular, double reflective) {
         this.A = A;
         this.B = B;
         this.center = center;
-        this.s = s;
-        this.rf = rf;
+        this.specular = specular;
+        this.reflective = reflective;
         this.color = color;
         A.div();
         B.div();
         N = A.mulVector(B);
     }
-    Plane(Vector N, Point center, Color color, double s, double rf) {
+    Plane(Vector N, Point center, Color color, double specular, double reflective) {
         this.center = center;
-        this.s = s;
-        this.rf = rf;
+        this.specular = specular;
+        this.reflective = reflective;
         this.color = color;
         this.N = N;
         this.A = new Vector(center, new Point(center.x + 1 + N.x * new Vector(1, 0, 0).sinAngle(N), center. y + N.y * new Vector(1, 0, 0).sinAngle(N), center.z + N.z * new Vector(1, 0, 0).sinAngle(N)));
@@ -327,10 +401,10 @@ class Plane extends Object {
         return color;
     }
     public double getS() {
-        return s;
+        return specular;
     }
     public double getRF() {
-        return rf;
+        return reflective;
     }
     public String toString() {
         return A + "; " + B + "; " + center;
@@ -346,33 +420,33 @@ class Plane extends Object {
     }
 }
 class Square extends Object {
-    double s, rf;
+    double specular, reflective;
     Point A, B, C, D;
     Plane plane;
     Color color;
-    Square(Point A, Point B, Point C, Point D, Color color, double s, double rf) {
+    Square(Point A, Point B, Point C, Point D, Color color, double specular, double reflective) {
         this.color = color;
-        this.s = s;
-        this.rf = rf;
+        this.specular = specular;
+        this.reflective = reflective;
         this.A = A;
         this.B = B;
         this.C = C;
         this.D = D;
-        plane = new Plane(new Vector(A, B), new Vector(A, C), A, color, s, rf);
+        plane = new Plane(new Vector(A, B), new Vector(A, C), A, color, specular, reflective);
     }
-    Square(double a, Point center, Vector v1, Vector v2, Color color, double s, double rf) {
-        plane = new Plane(v1, v2, center, color, s, rf);
+    Square(double length, Point center, Vector v1, Vector v2, Color color, double specular, double reflective) {
+        plane = new Plane(v1, v2, center, color, specular, reflective);
         Vector vector1 = new Vector(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         Vector vector2 = new Vector(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         vector1.div();
         vector2.div();
         this.color = color;
-        this.s = s;
-        this.rf = rf;
-        A = new Point(center.x + vector1.x * a / Math.pow(2, 0.5), center.y + vector1.y * a / Math.pow(2, 0.5), center.z + vector1.z * a / Math.pow(2, 0.5));
-        B = new Point(center.x + vector2.x * a / Math.pow(2, 0.5), center.y + vector2.y * a / Math.pow(2, 0.5), center.z + vector2.z * a / Math.pow(2, 0.5));
-        C = new Point(center.x - vector1.x * a / Math.pow(2, 0.5), center.y - vector1.y * a / Math.pow(2, 0.5), center.z - vector1.z * a / Math.pow(2, 0.5));
-        D = new Point(center.x - vector2.x * a / Math.pow(2, 0.5), center.y - vector2.y * a / Math.pow(2, 0.5), center.z - vector2.z * a / Math.pow(2, 0.5));
+        this.specular = specular;
+        this.reflective = reflective;
+        A = new Point(center.x + vector1.x * length / Math.pow(2, 0.5), center.y + vector1.y * length / Math.pow(2, 0.5), center.z + vector1.z * length / Math.pow(2, 0.5));
+        B = new Point(center.x + vector2.x * length / Math.pow(2, 0.5), center.y + vector2.y * length / Math.pow(2, 0.5), center.z + vector2.z * length / Math.pow(2, 0.5));
+        C = new Point(center.x - vector1.x * length / Math.pow(2, 0.5), center.y - vector1.y * length / Math.pow(2, 0.5), center.z - vector1.z * length / Math.pow(2, 0.5));
+        D = new Point(center.x - vector2.x * length / Math.pow(2, 0.5), center.y - vector2.y * length / Math.pow(2, 0.5), center.z - vector2.z * length / Math.pow(2, 0.5));
     }
     double dist(Vector vector, Point point) {
         Point P = intersection(vector, point);
@@ -385,10 +459,10 @@ class Square extends Object {
         return color;
     }
     double getS() {
-        return s;
+        return specular;
     }
     double getRF() {
-        return rf;
+        return reflective;
     }
     public String toString() {
         return A + "; " + B + "; " + C + "; " + D;
@@ -402,12 +476,12 @@ class Square extends Object {
 }
 class Circle extends Plane {
     double r;
-    Circle(Vector A, Vector B, Point center, double r, Color color, double s, double rf) {
-        super(A, B, center, color, s, rf);
+    Circle(Vector A, Vector B, Point center, double r, Color color, double specular, double reflective) {
+        super(A, B, center, color, specular, reflective);
         this.r = r;
     }
-    Circle(Vector N, Point center, double r, Color color, double s, double rf) {
-        super(N, center, color, s, rf);
+    Circle(Vector N, Point center, double r, Color color, double specular, double reflective) {
+        super(N, center, color, specular, reflective);
         this.r = r;
     }
     public double dist(Vector vector, Point point) {
@@ -429,15 +503,15 @@ class Circle extends Plane {
     }
 }
 class Cone extends Object {
-    double s, rf, angle, len;
+    double specular, reflective, angle, len;
     Point center;
     Vector V;
     Color color;
-    Cone (Vector V, Point center, double angle, double len, Color color, double s, double rf) {
+    Cone (Vector V, Point center, double angle, double len, Color color, double specular, double reflective) {
         this.V = V;
         this.center = center;
-        this.s = s;
-        this.rf = rf;
+        this.specular = specular;
+        this.reflective = reflective;
         this.len = len;
         this.angle = angle;
         this.color = color;
@@ -464,8 +538,8 @@ class Cone extends Object {
         return t * vector.dist();
     }
     Color Color() {return color;}
-    double getS() {return s;}
-    double getRF() {return rf;}
+    double getS() {return specular;}
+    double getRF() {return reflective;}
     public String toString() {return null;}
     public Point intersection(Vector vector, Point point) {
         double dist = dist(vector, point);
@@ -576,9 +650,9 @@ class Canvas {
         }
     }
     public void render (Scene scene) {
-        for (int x = 0; x < wsc; x++) {
-            for (int y = 0; y < hsc; y++) {
-                Color color = new Ray(new Vector(x, y, wsc, hsc), new Point(0, 0, 0)).takeColor(0, scene);
+       for (int x = 0; x < wsc; x++) {
+             for (int y = 0; y < hsc; y++) {
+                Color color = new Ray(new Vector(x, y, wsc, hsc), new Point(0, 0, 0)).takeColor(2, scene);
                 if (color == null) color = new Color(0, 0, 0);
                 draw_point(x, y, color);
             }
